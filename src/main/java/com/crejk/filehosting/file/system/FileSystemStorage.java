@@ -5,7 +5,6 @@ import io.vavr.concurrent.Future;
 import io.vavr.control.Option;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -28,9 +27,13 @@ public final class FileSystemStorage implements FileStorage {
 
     @Override
     public Option<File> findFile(String filename) {
-        return listFiles(nameFilter(filename))
-                .filter(files -> files.length >= 1)
-                .map(files -> files[0]);
+        File file = new File(directory, filename);
+
+        if (!file.exists()) {
+            return Option.none();
+        }
+
+        return Option.some(file);
     }
 
     @Override
@@ -47,13 +50,5 @@ public final class FileSystemStorage implements FileStorage {
         } catch (IOException e) {
             return Future.failed(e);
         }
-    }
-
-    private Option<File[]> listFiles(FilenameFilter filenameFilter) {
-        return Option.of(directory.listFiles(filenameFilter));
-    }
-
-    private FilenameFilter nameFilter(String name) {
-        return (dir, filename) -> filename.equals(name);
     }
 }
