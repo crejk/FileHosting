@@ -8,7 +8,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -36,16 +39,16 @@ public final class FileSystemStorage implements FileStorage {
     }
 
     @Override
-    public Future<File> createFile(String filename, byte[] content) {
-        var file = new File(directory, filename);
+    public Future<Path> createFile(String filename, byte[] content) {
+        var path = Path.of(directory.getAbsolutePath(), filename);
 
         try {
             var channel = AsynchronousFileChannel
-                    .open(file.toPath(), CREATE_AND_WRITE, executor);
+                    .open(path, CREATE_AND_WRITE, executor);
 
             var future = channel.write(ByteBuffer.wrap(content), 0);
 
-            return Future.fromJavaFuture(future).map(i -> file);
+            return Future.fromJavaFuture(future).map(i -> path);
         } catch (IOException e) {
             return Future.failed(e);
         }
