@@ -15,7 +15,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-public final class FileSystemStorage implements FileStorage {
+final class FileSystemStorage implements FileStorage {
 
     private static final Set<OpenOption> CREATE_AND_WRITE = Set.of(StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
 

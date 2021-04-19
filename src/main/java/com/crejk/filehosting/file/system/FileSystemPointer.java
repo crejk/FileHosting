@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 
 import java.io.*;
 
-public final class FileSystemPointer implements FilePointer {
+final class FileSystemPointer implements FilePointer {
 
     private final File target;
     private final String originalName;

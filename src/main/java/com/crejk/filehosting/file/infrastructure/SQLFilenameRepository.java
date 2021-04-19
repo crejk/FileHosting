@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.UUID;
 
-public final class SQLFilenameRepository implements FilenameRepository {
+final class SQLFilenameRepository implements FilenameRepository {
 
     private static final String INSERT_FILE_QUERY = "insert into files (id, name) VALUES (:id, :name)";
     private static final String FILENAME_BY_ID_QUERY = "select name from files where (files.id = :id)";
