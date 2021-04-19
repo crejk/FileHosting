@@ -8,8 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -27,13 +26,13 @@ public final class FileSystemStorage implements FileStorage {
 
     @Override
     public Option<File> findFile(String filename) {
-        File file = new File(directory, filename);
+        var path = Path.of(directory.getAbsolutePath(), filename);
 
-        if (!file.exists()) {
+        if (!Files.exists(path)) {
             return Option.none();
         }
 
-        return Option.some(file);
+        return Option.some(path.toFile());
     }
 
     @Override
