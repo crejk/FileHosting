@@ -5,7 +5,7 @@ import com.crejk.filehosting.file.FilePointer;
 import com.crejk.filehosting.file.FileService;
 import com.crejk.filehosting.file.FileStorage;
 import com.crejk.filehosting.file.FilenameRepository;
-import com.crejk.filehosting.file.type.FileMediaTypeDetector;
+import com.crejk.filehosting.common.MediaTypeDetector;
 import io.vavr.concurrent.Future;
 import io.vavr.control.Either;
 import org.springframework.http.HttpStatus;
@@ -13,16 +13,14 @@ import org.springframework.http.HttpStatus;
 import java.io.File;
 import java.util.UUID;
 
-public class FileSystemService implements FileService {
+final class FileSystemService implements FileService {
 
     private final FileStorage storage;
     private final FilenameRepository repository;
-    private final FileMediaTypeDetector contentTypeDetector;
 
-    public FileSystemService(FileStorage storage, FilenameRepository repository, FileMediaTypeDetector contentTypeDetector) {
+    public FileSystemService(FileStorage storage, FilenameRepository repository) {
         this.storage = storage;
         this.repository = repository;
-        this.contentTypeDetector = contentTypeDetector;
     }
 
     @Override
@@ -34,7 +32,7 @@ public class FileSystemService implements FileService {
     }
 
     private FilePointer fileSystemPointerOf(File file, String originalFilename) {
-        return new FileSystemPointer(file, originalFilename, contentTypeDetector.detect(file));
+        return new FileSystemPointer(file, originalFilename, MediaTypeDetector.detect(file));
     }
 
     @Override
