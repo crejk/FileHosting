@@ -1,6 +1,6 @@
 package com.crejk.filehosting.file.infrastructure;
 
-import com.crejk.filehosting.file.FileRepository;
+import com.crejk.filehosting.file.FilenameRepository;
 import io.vavr.control.Option;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -9,14 +9,14 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.UUID;
 
-public final class SQLFileRepository implements FileRepository {
+public final class SQLFilenameRepository implements FilenameRepository {
 
     private static final String INSERT_FILE_QUERY = "insert into files (id, name) VALUES (:id, :name)";
     private static final String FILENAME_BY_ID_QUERY = "select name from files where (files.id = :id)";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public SQLFileRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+    public SQLFilenameRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

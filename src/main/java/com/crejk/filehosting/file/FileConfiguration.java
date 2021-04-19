@@ -13,9 +13,4 @@ public class FileConfiguration {
     public FileMediaTypeDetector contentTypeFetcher() {
         return new TikaFileMediaTypeDetector(new Tika());
     }
-
-    @Bean
-    public FileService fileService(FileStorage storage, FileRepository repository, FilePointerMapper mapper) {
-        return new FileService(storage, repository, mapper);
-    }
 }

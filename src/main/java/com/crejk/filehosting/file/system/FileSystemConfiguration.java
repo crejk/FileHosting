@@ -1,13 +1,15 @@
 package com.crejk.filehosting.file.system;
 
-import com.crejk.filehosting.file.FilePointerMapper;
-import com.crejk.filehosting.file.FileRepository;
+import com.crejk.filehosting.file.FilenameRepository;
+import com.crejk.filehosting.file.FileService;
 import com.crejk.filehosting.file.FileStorage;
 import com.crejk.filehosting.file.type.FileMediaTypeDetector;
+import com.crejk.filehosting.infrastructure.Profiles;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,12 +18,13 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Profile(Profiles.SYSTEM)
 @Configuration
 public class FileSystemConfiguration {
 
     @Bean
-    public FilePointerMapper mapper(FileRepository repository, FileMediaTypeDetector contentTypeDetector) {
-        return new FileSystemPointerMapper(repository, contentTypeDetector);
+    public FileService fileService(FileStorage storage, FilenameRepository repository, FileMediaTypeDetector mediaTypeDetector) {
+        return new FileSystemService(storage, repository, mediaTypeDetector);
     }
 
     @Bean

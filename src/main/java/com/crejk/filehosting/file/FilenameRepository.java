@@ -4,7 +4,7 @@ import io.vavr.control.Option;
 
 import java.util.UUID;
 
-public interface FileRepository {
+public interface FilenameRepository {
 
     Option<String> getOriginalFilename(UUID id);
 
