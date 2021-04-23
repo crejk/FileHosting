@@ -2,22 +2,22 @@ package com.crejk.filehosting.common;
 
 import org.springframework.http.HttpStatus;
 
-public class RequestFailure {
+public final class RequestFailure {
 
-    private final int code;
+    private final HttpStatus status;
     private final String message;
 
-    public RequestFailure(int code, String message) {
-        this.code = code;
+    public RequestFailure(HttpStatus status, String message) {
+        this.status = status;
         this.message = message;
     }
 
-    public static RequestFailure of(HttpStatus status) {
-        return new RequestFailure(status.value(), status.getReasonPhrase());
+    public RequestFailure(HttpStatus status) {
+        this(status, status.getReasonPhrase());
     }
 
-    public int getCode() {
-        return code;
+    public HttpStatus getStatus() {
+        return status;
     }
 
     public String getMessage() {

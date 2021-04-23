@@ -1,11 +1,11 @@
 package com.crejk.filehosting.file.system;
 
+import com.crejk.filehosting.common.MediaTypeDetector;
 import com.crejk.filehosting.common.RequestFailure;
 import com.crejk.filehosting.file.FilePointer;
 import com.crejk.filehosting.file.FileService;
 import com.crejk.filehosting.file.FileStorage;
 import com.crejk.filehosting.file.FilenameRepository;
-import com.crejk.filehosting.common.MediaTypeDetector;
 import io.vavr.concurrent.Future;
 import io.vavr.control.Either;
 import org.springframework.http.HttpStatus;
@@ -28,7 +28,7 @@ final class FileSystemService implements FileService {
         return storage.findFile(id.toString())
                 .flatMap(file -> repository.getOriginalFilename(id)
                         .map(originalFilename -> fileSystemPointerOf(file, originalFilename)))
-                .toEither(RequestFailure.of(HttpStatus.NOT_FOUND));
+                .toEither(new RequestFailure(HttpStatus.NOT_FOUND));
     }
 
     private FilePointer fileSystemPointerOf(File file, String originalFilename) {

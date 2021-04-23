@@ -32,7 +32,7 @@ public final class DownloadService {
     }
 
     private ResponseEntity<Resource> errorAsResponseEntity(RequestFailure left) {
-        return ResponseEntity.status(left.getCode())
+        return ResponseEntity.status(left.getStatus())
                 .body(new ByteArrayResource(left.getMessage().getBytes(StandardCharsets.UTF_8)));
     }
 }
