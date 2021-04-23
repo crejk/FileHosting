@@ -1,6 +1,7 @@
 package com.crejk.filehosting.upload;
 
 import com.crejk.filehosting.common.RequestFailure;
+import com.crejk.filehosting.common.ResponseEntityConverter;
 import com.crejk.filehosting.file.FileService;
 import io.vavr.control.Either;
 import io.vavr.control.Option;
@@ -28,12 +29,12 @@ public final class UploadService {
         String originalFilename = file.getOriginalFilename();
         LOG.debug("File upload for '{}'", originalFilename);
 
-        return Option.of(originalFilename)
+        Either<RequestFailure, UUID> fileId = Option.of(originalFilename)
                 .filter(originalName -> !originalName.isEmpty())
                 .toEither(() -> new RequestFailure(HttpStatus.BAD_REQUEST, "Original filename cannot be empty!"))
-                .flatMap(originalName -> createFile(file, originalName))
-                .map(ResponseEntity::ok)
-                .getOrElseThrow(failure -> new ResponseStatusException(failure.getStatus(), failure.getMessage()));
+                .flatMap(originalName -> createFile(file, originalName));
+
+        return ResponseEntityConverter.toResponseEntity(fileId);
     }
 
     private Either<RequestFailure, UUID> createFile(MultipartFile file, String originalFilename) {
