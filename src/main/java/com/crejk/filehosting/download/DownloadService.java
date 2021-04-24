@@ -27,7 +27,7 @@ public final class DownloadService {
         return ResponseEntity.ok()
                 .contentType(file.getMediaType().getOrNull())
                 .contentLength(file.getSize())
-                .header("Content-Disposition", "inline; filename=" + file.getOriginalName())
+                .header("Content-Disposition", "filename=" + file.getOriginalName())
                 .body(new InputStreamResource(file.open()));
     }
 
