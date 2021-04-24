@@ -34,9 +34,10 @@ public abstract class IntegrationTest {
     protected WebApplicationContext webApplicationContext;
     @Autowired
     protected FileService fileService;
-    protected MockMvc mockMvc;
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    protected MockMvc mockMvc;
 
     @BeforeEach
     public void setup() throws IOException {
