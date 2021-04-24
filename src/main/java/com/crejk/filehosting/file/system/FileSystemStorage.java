@@ -48,7 +48,7 @@ final class FileSystemStorage implements FileStorage {
 
             var future = channel.write(ByteBuffer.wrap(content), 0);
 
-            return Future.fromJavaFuture(future).map(i -> path);
+            return Future.fromJavaFuture(executor, future).map(i -> path);
         } catch (IOException e) {
             return Future.failed(e);
         }
