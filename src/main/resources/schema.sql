@@ -1,6 +1,6 @@
 create table files
 (
-    id   binary(16) not null,
+    id   uuid    not null,
     name varchar not null,
     primary key (id)
 );

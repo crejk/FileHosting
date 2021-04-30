@@ -1,23 +1,20 @@
 package com.crejk.filehosting.file.system;
 
+import com.crejk.filehosting.file.api.FileDto;
 import com.crejk.filehosting.file.FileStorage;
-import io.vavr.concurrent.Future;
 import io.vavr.control.Option;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-final class FileSystemStorage implements FileStorage {
+public final class FileSystemStorage implements FileStorage {
 
-    private static final Set<OpenOption> CREATE_AND_WRITE = Set.of(StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+    private static final Set<OpenOption> CREATE_AND_WRITE = Set.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
     private final File directory;
     private final ExecutorService executor;
@@ -35,22 +32,15 @@ final class FileSystemStorage implements FileStorage {
             return Option.none();
         }
 
-        return Option.some(path.toFile());
+        return Option.of(path.toFile());
     }
 
     @Override
-    public Future<Path> createFile(String filename, byte[] content) {
-        var path = Path.of(directory.getAbsolutePath(), filename);
+    public Mono<Path> createFile(String name, FileDto fileDto) {
+        var path = Paths.get(directory.getAbsolutePath(), name);
 
-        try {
-            var channel = AsynchronousFileChannel
-                    .open(path, CREATE_AND_WRITE, executor);
-
-            var future = channel.write(ByteBuffer.wrap(content), 0);
-
-            return Future.fromJavaFuture(executor, future).map(i -> path);
-        } catch (IOException e) {
-            return Future.failed(e);
-        }
+        return Mono.fromCallable(() -> AsynchronousFileChannel.open(path, CREATE_AND_WRITE, executor))
+                .flatMapMany(channel -> DataBufferUtils.write(fileDto.getContent(), channel, 0))
+                .then(Mono.just(path));
     }
 }

@@ -1,17 +1,19 @@
 package com.crejk.filehosting.download;
 
-import com.crejk.filehosting.common.RequestFailure;
 import com.crejk.filehosting.file.FilePointer;
 import com.crejk.filehosting.file.FileService;
-import org.springframework.core.io.ByteArrayResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public final class DownloadService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadService.class);
 
     private final FileService fileService;
 
@@ -19,20 +21,20 @@ public final class DownloadService {
         this.fileService = fileService;
     }
 
-    public ResponseEntity<Resource> downloadFile(UUID id) {
-        return fileService.getFile(id).fold(this::errorAsResponseEntity, this::filePointerAsResponseEntity);
+    public Mono<ResponseEntity<Resource>> downloadFile(UUID id) {
+        LOG.debug("File download for {}", id);
+
+        return fileService.getFile(id)
+                .map(this::filePointerAsResponseEntity);
     }
 
     private ResponseEntity<Resource> filePointerAsResponseEntity(FilePointer file) {
+        LOG.debug("FilePointer name '{}', mediaType {}", file.getOriginalName(), file.getMediaType().getOrNull());
+
         return ResponseEntity.ok()
                 .contentType(file.getMediaType().getOrNull())
                 .contentLength(file.getSize())
                 .header("Content-Disposition", "filename=" + file.getOriginalName())
                 .body(new InputStreamResource(file.open()));
-    }
-
-    private ResponseEntity<Resource> errorAsResponseEntity(RequestFailure left) {
-        return ResponseEntity.status(left.getStatus())
-                .body(new ByteArrayResource(left.getMessage().getBytes(StandardCharsets.UTF_8)));
     }
 }

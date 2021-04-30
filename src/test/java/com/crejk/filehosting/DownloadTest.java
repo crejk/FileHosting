@@ -2,38 +2,42 @@ package com.crejk.filehosting;
 
 import com.crejk.filehosting.base.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
 import static com.crejk.filehosting.base.SampleFiles.TEXT_FILE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class DownloadTest extends IntegrationTest {
 
     @Test
-    public void shouldReturnFile() throws Exception {
+    public void shouldReturnFile() {
         // given
-        UUID fileId = fileService.createFile(TEXT_FILE.getOriginalFilename(), TEXT_FILE.getBytes()).get();
+        UUID fileId = fileService.createFile(TEXT_FILE.toFileDto()).block();
 
         // when
-        var result = mockMvc.perform(get("/download/" + fileId));
+        var result = webTestClient.get()
+                .uri("/download/" + fileId)
+                .exchange();
 
         // then
-        result.andExpect(status().isOk())
-                .andExpect(content().bytes(TEXT_FILE.getBytes()))
-                .andExpect(header().string("Content-Disposition", "filename=" + TEXT_FILE.getOriginalFilename()));
+        result.expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_PLAIN)
+                .expectHeader().valueEquals("Content-Disposition", "filename=" + TEXT_FILE.getFilename())
+                .expectBody(byte[].class).isEqualTo(TEXT_FILE.getContent());
     }
 
     @Test
-    public void shouldReturnNotFoundErrorIfUserWantToDownloadNonexistentFile() throws Exception {
+    public void shouldReturnNotFoundErrorIfUserWantToDownloadNonexistentFile() {
         // given
         UUID nonexistentFileId = UUID.randomUUID();
 
         // when
-        var result = mockMvc.perform(get("/download/" + nonexistentFileId));
+        var result = webTestClient.get()
+                .uri("/download/" + nonexistentFileId)
+                .exchange();
 
         // then
-        result.andExpect(status().isNotFound());
+        result.expectStatus().isNotFound();
     }
 }
