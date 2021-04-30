@@ -3,41 +3,57 @@ package com.crejk.filehosting.base;
 import com.crejk.filehosting.FileHostingApplication;
 import com.crejk.filehosting.file.FileService;
 import com.crejk.filehosting.infrastructure.Profiles;
+import io.r2dbc.spi.ConnectionFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 
 @ActiveProfiles(profiles = Profiles.SYSTEM)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = FileHostingApplication.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = "classpath:application-test.yml")
+@Testcontainers
+@AutoConfigureWebTestClient
 public abstract class IntegrationTest {
 
+    @Container
+    static PostgreSQLContainer container = new PostgreSQLContainer("postgres:13.1")
+            .withDatabaseName("files");
     @Autowired
     protected TestRestTemplate restTemplate;
     @Autowired
-    protected WebApplicationContext webApplicationContext;
-    @Autowired
     protected FileService fileService;
     @Autowired
-    private NamedParameterJdbcTemplate jdbcTemplate;
+    protected WebTestClient webTestClient;
+    @Autowired
+    private ConnectionFactory connectionFactory;
 
-    protected MockMvc mockMvc;
+    @DynamicPropertySource
+    static void propertySourceDyn(DynamicPropertyRegistry registry) {
+        String jdbcUrl = container.getJdbcUrl();
+
+        registry.add("spring.r2dbc.url", () -> jdbcUrl.replace("jdbc", "r2dbc"));
+        registry.add("spring.r2dbc.username", container::getUsername);
+        registry.add("spring.r2dbc.password", container::getPassword);
+    }
 
     @BeforeEach
     public void setup() throws IOException {
@@ -46,14 +62,15 @@ public abstract class IntegrationTest {
         if (!Files.exists(filesPath)) {
             Files.createDirectory(filesPath);
         }
-
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .build();
     }
 
     @AfterEach
     public void cleanup() throws IOException {
-        jdbcTemplate.update("delete from files", Collections.emptyMap());
+        Mono.from(connectionFactory.create())
+                .flatMapMany(connection -> connection
+                        .createStatement("delete from files")
+                        .execute())
+                .subscribe();
 
         FileUtils.deleteDirectory(new File("files"));
     }

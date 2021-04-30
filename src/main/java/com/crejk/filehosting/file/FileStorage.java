@@ -1,7 +1,8 @@
 package com.crejk.filehosting.file;
 
-import io.vavr.concurrent.Future;
+import com.crejk.filehosting.file.api.FileDto;
 import io.vavr.control.Option;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -10,5 +11,5 @@ public interface FileStorage {
 
     Option<File> findFile(String filename);
 
-    Future<Path> createFile(String filename, byte[] content);
+    Mono<Path> createFile(String name, FileDto fileDto);
 }
