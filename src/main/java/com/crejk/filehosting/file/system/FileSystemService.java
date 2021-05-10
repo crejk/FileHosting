@@ -1,7 +1,10 @@
 package com.crejk.filehosting.file.system;
 
 import com.crejk.filehosting.common.MediaTypeDetector;
-import com.crejk.filehosting.file.*;
+import com.crejk.filehosting.file.FilePointer;
+import com.crejk.filehosting.file.FileService;
+import com.crejk.filehosting.file.FileStorage;
+import com.crejk.filehosting.file.FilenameRepository;
 import com.crejk.filehosting.file.api.FileDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
