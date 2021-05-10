@@ -2,8 +2,11 @@ package com.crejk.filehosting;
 
 import com.crejk.filehosting.base.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
+
+import java.util.UUID;
 
 import static com.crejk.filehosting.base.SampleFiles.TEXT_FILE;
 
@@ -23,6 +26,6 @@ public class UploadTest extends IntegrationTest {
 
         // then
         result.expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+                .expectBodyList(UUID.class).hasSize(1);
     }
 }
