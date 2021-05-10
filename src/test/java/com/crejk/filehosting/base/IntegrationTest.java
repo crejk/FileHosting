@@ -3,7 +3,6 @@ package com.crejk.filehosting.base;
 import com.crejk.filehosting.FileHostingApplication;
 import com.crejk.filehosting.file.FileService;
 import com.crejk.filehosting.infrastructure.Profiles;
-import io.r2dbc.spi.ConnectionFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -19,7 +19,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public abstract class IntegrationTest {
     @Autowired
     protected WebTestClient webTestClient;
     @Autowired
-    private ConnectionFactory connectionFactory;
+    private DatabaseClient databaseClient;
 
     @DynamicPropertySource
     static void propertySourceDyn(DynamicPropertyRegistry registry) {
@@ -66,11 +65,8 @@ public abstract class IntegrationTest {
 
     @AfterEach
     public void cleanup() throws IOException {
-        Mono.from(connectionFactory.create())
-                .flatMapMany(connection -> connection
-                        .createStatement("delete from files")
-                        .execute())
-                .subscribe();
+        databaseClient.sql("delete from files")
+                .then().subscribe();
 
         FileUtils.deleteDirectory(new File("files"));
     }
