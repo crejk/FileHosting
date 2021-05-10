@@ -23,7 +23,7 @@ public final class UploadService {
 
     public Mono<UUID> uploadFile(FilePart file) {
         String originalFilename = file.filename();
-        LOG.debug("File upload for '{}', original: '{}'", file.name(), originalFilename);
+        LOG.debug("File upload for '{}'", originalFilename);
 
         return Mono.justOrEmpty(originalFilename)
                 .filter(originalName -> !originalName.isEmpty())
