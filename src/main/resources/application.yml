@@ -1,3 +1,9 @@
 files.directory: files
 spring.mvc.throw-exception-if-no-handler-found: true
 spring.profiles.default: system
+spring:
+  r2dbc:
+    username: user
+    password: pass
+    pool:
+      enabled: true
