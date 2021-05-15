@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -36,8 +35,6 @@ public abstract class IntegrationTest {
     @Container
     static PostgreSQLContainer container = new PostgreSQLContainer("postgres:13.1")
             .withDatabaseName("files");
-    @Autowired
-    protected TestRestTemplate restTemplate;
     @Autowired
     protected FileService fileService;
     @Autowired
