@@ -38,12 +38,13 @@ public abstract class IntegrationTest {
     @Autowired
     protected FileService fileService;
     @Autowired
-    protected WebTestClient webTestClient;
+    private WebTestClient webTestClient;
+    protected TestClient testClient;
     @Autowired
     private DatabaseClient databaseClient;
 
     @DynamicPropertySource
-    static void propertySourceDyn(DynamicPropertyRegistry registry) {
+    static void propertySource(DynamicPropertyRegistry registry) {
         String jdbcUrl = container.getJdbcUrl();
 
         registry.add("spring.r2dbc.url", () -> jdbcUrl.replace("jdbc", "r2dbc"));
@@ -53,6 +54,7 @@ public abstract class IntegrationTest {
 
     @BeforeEach
     public void setup() throws IOException {
+        testClient = new TestClient(webTestClient);
         Path filesPath = Paths.get("files");
 
         if (!Files.exists(filesPath)) {
@@ -62,8 +64,10 @@ public abstract class IntegrationTest {
 
     @AfterEach
     public void cleanup() throws IOException {
-        databaseClient.sql("delete from files")
-                .then().subscribe();
+        databaseClient
+                .sql("delete from files")
+                .then()
+                .subscribe();
 
         FileUtils.deleteDirectory(new File("files"));
     }

@@ -16,9 +16,7 @@ public class DownloadTest extends IntegrationTest {
         UUID fileId = fileService.createFile(TEXT_FILE.toFileDto()).block();
 
         // when
-        var result = webTestClient.get()
-                .uri("/download/" + fileId)
-                .exchange();
+        var result = testClient.download(fileId);
 
         // then
         result.expectStatus().isOk()
@@ -33,9 +31,7 @@ public class DownloadTest extends IntegrationTest {
         UUID nonexistentFileId = UUID.randomUUID();
 
         // when
-        var result = webTestClient.get()
-                .uri("/download/" + nonexistentFileId)
-                .exchange();
+        var result = testClient.download(nonexistentFileId);
 
         // then
         result.expectStatus().isNotFound();

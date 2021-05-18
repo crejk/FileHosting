@@ -2,7 +2,9 @@ package com.crejk.filehosting;
 
 import com.crejk.filehosting.base.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.util.MultiValueMap;
 
 import java.util.UUID;
 
@@ -15,12 +17,10 @@ public class UploadTest extends IntegrationTest {
         // given
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", TEXT_FILE);
+        MultiValueMap<String, HttpEntity<?>> body = bodyBuilder.build();
 
         // when
-        var result = webTestClient.post()
-                .uri("/upload/")
-                .bodyValue(bodyBuilder.build())
-                .exchange();
+        var result = testClient.upload(body);
 
         // then
         result.expectStatus().isOk()
@@ -33,12 +33,10 @@ public class UploadTest extends IntegrationTest {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", TEXT_FILE);
         bodyBuilder.part("file", TEXT_FILE);
+        MultiValueMap<String, HttpEntity<?>> body = bodyBuilder.build();
 
         // when
-        var result = webTestClient.post()
-                .uri("/upload/")
-                .bodyValue(bodyBuilder.build())
-                .exchange();
+        var result = testClient.upload(body);
 
         // then
         result.expectStatus().isOk()
